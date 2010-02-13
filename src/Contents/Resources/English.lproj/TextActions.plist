@@ -7,11 +7,11 @@
 		<key>Balanced Tag</key>
 		<dict>
 			<key>action</key>
-			<string>TEABalance</string>
+			<string>TEAZenActions</string>
 			<key>options</key>
 			<dict>
-				<key>direction</key>
-				<string>out</string>
+				<key>action</key>
+				<string>match_pair_outward</string>
 			</dict>
 			<key>shortcut</key>
 			<string>^b</string>
@@ -21,11 +21,11 @@
 		<key>Balanced Tag (Inward)</key>
 		<dict>
 			<key>action</key>
-			<string>TEABalance</string>
+			<string>TEAZenActions</string>
 			<key>options</key>
 			<dict>
-				<key>direction</key>
-				<string>in</string>
+				<key>action</key>
+				<string>match_pair_inward</string>
 			</dict>
 			<key>shortcut</key>
 			<string>^$B</string>
@@ -35,24 +35,16 @@
 		<key>Expand Abbreviation</key>
 		<dict>
 			<key>action</key>
-			<string>TEASnippetWithWord</string>
+			<string>TEAZenActions</string>
 			<key>options</key>
 			<dict>
-				<key>alpha_numeric</key>
-				<true/>
-				<key>bidirectional</key>
-				<true/>
-				<key>extra_characters</key>
-				<string>_-#.&gt;+*:$!@</string>
-				<key>mode</key>
-				<string>zen</string>
-				<key>snippet</key>
-				<string>&lt;$SELECTED_TEXT&gt;$0&lt;/$WORD&gt;</string>
+				<key>action</key>
+				<string>expand_abbreviation</string>
 			</dict>
 			<key>shortcut</key>
-			<string>^,</string>
+			<string></string>
 			<key>submenu</key>
-			<string>Zen</string>
+			<string>Zen Coding</string>
 		</dict>
 		<key>Format: Emphasize</key>
 		<dict>
@@ -296,9 +288,93 @@
 			<key>action</key>
 			<string>TEAWrapWithAbbreviation</string>
 			<key>shortcut</key>
-			<string>^$A</string>
+			<string>~$A</string>
 			<key>submenu</key>
-			<string>Zen</string>
+			<string>Zen Coding</string>
+		</dict>
+		<key>Next Edit Point</key>
+		<dict>
+			<key>action</key>
+			<string>TEAZenActions</string>
+			<key>options</key>
+			<dict>
+				<key>action</key>
+				<string>next_edit_point</string>
+			</dict>
+			<key>shortcut</key>
+			<string>^~</string>
+			<key>submenu</key>
+			<string>Zen Coding</string>
+		</dict>
+		<key>Previuos Edit Point</key>
+		<dict>
+			<key>action</key>
+			<string>TEAZenActions</string>
+			<key>options</key>
+			<dict>
+				<key>action</key>
+				<string>prev_edit_point</string>
+			</dict>
+			<key>shortcut</key>
+			<string>^~</string>
+			<key>submenu</key>
+			<string>Zen Coding</string>
+		</dict>
+		<key>Merge Lines</key>
+		<dict>
+			<key>action</key>
+			<string>TEAZenActions</string>
+			<key>options</key>
+			<dict>
+				<key>action</key>
+				<string>merge_lines</string>
+			</dict>
+			<key>shortcut</key>
+			<string>^m</string>
+			<key>submenu</key>
+			<string>Zen Coding</string>
+		</dict>
+		<key>Remove tag</key>
+		<dict>
+			<key>action</key>
+			<string>TEAZenActions</string>
+			<key>options</key>
+			<dict>
+				<key>action</key>
+				<string>remove_tag</string>
+			</dict>
+			<key>shortcut</key>
+			<string>@$K</string>
+			<key>submenu</key>
+			<string>Zen Coding</string>
+		</dict>
+		<key>Split/Join tag</key>
+		<dict>
+			<key>action</key>
+			<string>TEAZenActions</string>
+			<key>options</key>
+			<dict>
+				<key>action</key>
+				<string>split_join_tag</string>
+			</dict>
+			<key>shortcut</key>
+			<string>@$J</string>
+			<key>submenu</key>
+			<string>Zen Coding</string>
+		</dict>
+		<key>Toggle comment</key>
+		<dict>
+			<key>action</key>
+			<string>TEAZenActions</string>
+			<key>options</key>
+			<dict>
+				<key>action</key>
+				<string>toggle_comment</string>
+			</dict>
+			<key>shortcut</key>
+			<string>@\</string>
+			<key>submenu</key>
+			<string>Zen Coding</string>
 		</dict>
 	</dict>
 </dict>

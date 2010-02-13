@@ -17,7 +17,7 @@ TYPE_EXPANDO = 'zen-expando',
 TYPE_REFERENCE = 'zen-reference';
 """ Reference to another abbreviation or tag """
 
-re_tag = r'^<([\w\-]+(?:\:\w+)?)((?:\s+[\w\-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>\s]+))?)*)\s*(\/?)>'
+re_tag = r'^<([\w\-]+(?:\:[\w\-]+)?)((?:\s+[\w\-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>\s]+))?)*)\s*(\/?)>'
 "Regular expression for XML tag matching"
 	
 re_attrs = r'([\w\-]+)\s*=\s*([\'"])(.*?)\2'

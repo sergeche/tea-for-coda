@@ -500,6 +500,7 @@ zen_settings = {
 	
 	'html': {
 		'extends': 'common',
+		'filters': 'html',
 		'snippets': {
 			'cc:ie6': '<!--[if lte IE 6]>\n\t${child}|\n<![endif]-->',
 			'cc:ie': '<!--[if IE]>\n\t${child}|\n<![endif]-->',
@@ -693,7 +694,8 @@ zen_settings = {
 	},
 	
 	'xsl': {
-		'extends': 'common,html', 
+		'extends': 'common,html',
+		'filters': 'html, xsl',
 		'abbreviations': {
 			'tm': '<xsl:template match="" mode=""></xsl:template>',
 			'tmatch': 'tm',
@@ -716,5 +718,10 @@ zen_settings = {
 #			expandos
 			'choose+': 'xsl:choose>xsl:when+xsl:otherwise'
 		}
+	},
+	
+	'haml': {
+		'filters': 'haml',
+		'extends': 'html'
 	}
 }

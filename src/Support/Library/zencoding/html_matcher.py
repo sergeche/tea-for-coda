@@ -26,6 +26,13 @@ last_match = {
 	'end_ix': -1
 }
 
+cur_mode = 'xhtml'
+"Current matching mode"
+
+def set_mode(new_mode):
+	global cur_mode
+	cur_mode = new_mode
+
 def make_map(elems):
 	"""
 	Create dictionary of elements for faster searching
@@ -67,14 +74,16 @@ class Tag():
 		@type ix: int
 		@param ix: Tag's position
 		"""
+		global cur_mode
+		
 		name = match.group(1).lower()
 		self.name = name
-		self.full_match = match.group(0)
+		self.full_tag = match.group(0)
 		self.start = ix
-		self.end = ix + len(self.full_match)
-		self.unary = ( len(match.groups()) > 2 and bool(match.group(3)) ) or (name in empty)
+		self.end = ix + len(self.full_tag)
+		self.unary = ( len(match.groups()) > 2 and bool(match.group(3)) ) or (name in empty and cur_mode == 'html')
 		self.type = 'tag'
-		self.close_self = name in close_self
+		self.close_self = (name in close_self and cur_mode == 'html')
 
 class Comment():
 	"Matched comment"
@@ -121,22 +130,34 @@ def save_match(opening_tag=None, closing_tag=None, ix=0):
 	
 	return last_match['start_ix'] != -1 and (last_match['start_ix'], last_match['end_ix']) or (None, None)
 
-def match(html, start_ix):
+def match(html, start_ix, mode='xhtml'):
 	"""
 	Search for matching tags in <code>html</code>, starting from
 	<code>start_ix</code> position. The result is automatically saved
 	in <code>last_match</code> property
 	"""
-	return _find_pair(html, start_ix, save_match)
+	return _find_pair(html, start_ix, mode, save_match)
 
-def find(html, start_ix):
+def find(html, start_ix, mode='xhtml'):
 	"""
 	Search for matching tags in <code>html</code>, starting from
 	<code>start_ix</code> position.
 	"""
-	return _find_pair(html, start_ix)
+	return _find_pair(html, start_ix, mode)
 
-def _find_pair(html, start_ix, action=make_range):
+def get_tags(html, start_ix, mode='xhtml'):
+	"""
+	Search for matching tags in <code>html</code>, starting from 
+	<code>start_ix</code> position. The difference between 
+	<code>match</code> function itself is that <code>get_tags</code> 
+	method doesn't save matched result in <code>last_match</code> property 
+	and returns array of opening and closing tags
+	This method is generally used for lookups
+	"""
+	return _find_pair(html, start_ix, mode, lambda op, cl, ix: (op, cl) if op.type == 'tag' else None)
+
+
+def _find_pair(html, start_ix, mode='xhtml', action=make_range):
 	"""
 	Search for matching tags in <code>html</code>, starting from
 	<code>start_ix</code> position
@@ -159,6 +180,9 @@ def _find_pair(html, start_ix, action=make_range):
 	opening_tag = None
 	closing_tag = None
 	html_len = len(html)
+	
+	if mode != 'html': mode = 'xhtml'
+	set_mode(mode)
 
 	def has_match(substr, start=None):
 		if start is None:
