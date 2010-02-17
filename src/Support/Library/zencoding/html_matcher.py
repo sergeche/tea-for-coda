@@ -31,6 +31,7 @@ cur_mode = 'xhtml'
 
 def set_mode(new_mode):
 	global cur_mode
+	if new_mode != 'html': new_mode = 'xhtml'
 	cur_mode = new_mode
 
 def make_map(elems):
@@ -181,7 +182,6 @@ def _find_pair(html, start_ix, mode='xhtml', action=make_range):
 	closing_tag = None
 	html_len = len(html)
 	
-	if mode != 'html': mode = 'xhtml'
 	set_mode(mode)
 
 	def has_match(substr, start=None):

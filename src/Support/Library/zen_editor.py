@@ -16,9 +16,16 @@ zen_editor.get_selection_range();
 @author Sergey Chikuyonok (serge.che@gmail.com)
 @link http://chikuyonok.ru
 '''
+import tea_actions as tea
+from zencoding import zen_core as zen_coding
+from zencoding import html_matcher
+import re
+
 class ZenEditor():
-	def __init__(self):
-		pass
+	def __init__(self, context=None):
+		self._context = None
+		if context:
+			self.set_context(context)
 
 	def set_context(self, context):
 		"""
@@ -26,7 +33,9 @@ class ZenEditor():
 		<code>before</code> using any Zen Coding action.
 		@param context: context object
 		"""
-		pass
+		self._context = context
+		zen_coding.set_newline(tea.get_line_ending(context))
+		zen_coding.zen_settings['variables']['indentation'] = tea.get_indentation_string(context)
 
 	def get_selection_range(self):
 		"""
@@ -36,8 +45,8 @@ class ZenEditor():
 		start, end = zen_editor.get_selection_range();
 		print('%s, %s' % (start, end))
 		"""
-		return 0, 0
-
+		rng = tea.get_range(self._context)
+		return rng.location, rng.location + rng.length
 
 	def create_selection(self, start, end=None):
 		"""
@@ -51,7 +60,9 @@ class ZenEditor():
 		# move caret to 15th character
 		zen_editor.create_selection(15)
 		"""
-		pass
+		if end is None: end = start
+		new_range = tea.new_range(start, end - start)
+		tea.set_selected_range(self._context, new_range)
 
 	def get_current_line_range(self):
 		"""
@@ -61,25 +72,27 @@ class ZenEditor():
 		start, end = zen_editor.get_current_line_range();
 		print('%s, %s' % (start, end))
 		"""
-		return 0, 0
+		text, rng = tea.get_line(self._context)
+		return rng.location, rng.location + rng.length
 
 	def get_caret_pos(self):
 		""" Returns current caret position """
-		return 0
+		return self.get_selection_range()[0]
 
 	def set_caret_pos(self, pos):
 		"""
 		Set new caret position
 		@type pos: int
 		"""
-		pass
+		self.create_selection(pos)
 
 	def get_current_line(self):
 		"""
 		Returns content of current line
 		@return: str
 		"""
-		return ''
+		text, rng = tea.get_line(self._context)
+		return text
 
 	def replace_content(self, value, start=None, end=None):
 		"""
@@ -104,25 +117,81 @@ class ZenEditor():
 		@param end: End index of editor's content
 		@type end: int
 		"""
-		pass
+		if start is None: start = 0
+		if end is None: end = len(self.get_content())
+		rng = tea.new_range(start, end - start)
+		value = self.add_placeholders(value)
+		
+		cursor_loc = value.find('$0')
+		if cursor_loc != -1:
+			select_range = tea.new_range(cursor_loc + rng.location, 0)
+			value = value.replace('$0', '')
+			tea.insert_text_and_select(self._context, value, rng, select_range)
+		else:
+			tea.insert_text(self._context, value, rng)
 
 	def get_content(self):
 		"""
 		Returns editor's content
 		@return: str
 		"""
-		return ''
+		return self._context.string()
 
 	def get_syntax(self):
 		"""
 		Returns current editor's syntax mode
 		@return: str
 		"""
-		return 'html'
+		doc_type = 'html'
+		css_exts = ['css', 'less']
+		xsl_exts = ['xsl', 'xslt']
+		path = self._context.path()
+		if path is not None:
+			pos = path.rfind('.')
+			if pos != -1:
+				pos += 1
+				ext = path[pos:]
+				if ext in css_exts:
+					doc_type = 'css'
+				elif ext in xsl_exts:
+					doc_type = 'xsl'
+				elif ext == 'haml':
+					doc_type = 'haml'
+				elif ext == 'xml':
+					doc_type = 'xml'
+		# No luck with the extension; check for inline style tags
+		if doc_type == 'html':
+			range = tea.get_range(self._context)
+			caret_pos = self.get_caret_pos()
+			
+			pair = html_matcher.get_tags(self.get_content(), caret_pos)
+			if pair and pair[0] and pair[0].type == 'tag'and pair[0].name.lower() == 'style':
+				# check that we're actually inside the tag
+				if pair[0].end <= caret_pos and pair[1].start >= caret_pos:
+					doc_type = 'css'
+			
+		return doc_type
 
 	def get_profile_name(self):
 		"""
 		Returns current output profile name (@see zen_coding#setup_profile)
 		@return {String}
 		"""
-		return 'xhtml'
+		syntax = self.get_syntax()
+		if syntax == 'xsl' or syntax == 'xml':
+			return 'xml'
+		else:
+			return 'xhtml'
+	
+	def add_placeholders(self, text):
+		_ix = [0]
+		
+		def get_ix(m):
+			if not _ix[0]:
+				_ix[0] += 1
+				return '$0'
+			else:
+				return ''
+		
+		text = re.sub(r'\$', '\\$', text)
+		return re.sub(zen_coding.get_caret_placeholder(), get_ix, text)

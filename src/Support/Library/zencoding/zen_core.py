@@ -268,6 +268,12 @@ def get_variable(name):
 	"""
 	return zen_settings['variables'][name]
 
+def set_variable(name, value):
+	"""
+	Set variable value
+	"""
+	zen_settings['variables'][name] = value
+
 def get_indentation():
 	"""
 	Returns indentation string

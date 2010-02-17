@@ -67,6 +67,8 @@ def expand_abbreviation_with_tab(editor, syntax, profile_name='xhtml'):
 	"""
 	if not expand_abbreviation(editor, syntax, profile_name):
 		editor.replace_content(zen_coding.get_variable('indentation'), editor.get_caret_pos())
+	
+	return True 
 
 def match_pair(editor, direction='out', syntax=None):
 	"""
@@ -77,7 +79,7 @@ def match_pair(editor, direction='out', syntax=None):
 	@type direction: str 
 	"""
 	direction = direction.lower()
-	if syntax is None: syntax = editor.get_syntax()
+	if syntax is None: syntax = editor.get_profile_name()
 	
 	range_start, range_end = editor.get_selection_range()
 	cursor = range_end
@@ -95,9 +97,9 @@ def match_pair(editor, direction='out', syntax=None):
 		elif old_open_tag.start == range_start:
 			if content[old_open_tag.end] == '<':
 #				test if the first inward tag matches the entire parent tag's content
-				_r = html_matcher.find(content, old_open_tag.end + 1)
+				_r = html_matcher.find(content, old_open_tag.end + 1, syntax)
 				if _r[0] == old_open_tag.end and _r[1] == old_close_tag.start:
-					rng = html_matcher.match(content, old_open_tag.end + 1)
+					rng = html_matcher.match(content, old_open_tag.end + 1, syntax)
 				else:
 					rng = (old_open_tag.end, old_close_tag.start)
 			else:
@@ -105,9 +107,9 @@ def match_pair(editor, direction='out', syntax=None):
 		else:
 			new_cursor = content[0:old_close_tag.start].find('<', old_open_tag.end)
 			search_pos = new_cursor + 1 if new_cursor != -1 else old_open_tag.end
-			rng = html_matcher.match(content, search_pos)
+			rng = html_matcher.match(content, search_pos, syntax)
 	else:
-		rng = html_matcher.match(content, cursor)
+		rng = html_matcher.match(content, cursor, syntax)
 	
 	if rng and rng[0] is not None:
 		editor.create_selection(rng[0], rng[1])
@@ -164,7 +166,7 @@ def wrap_with_abbreviation(editor, abbr, syntax=None, profile_name=None):
 	
 	if start_offset == end_offset:
 		# no selection, find tag pair
-		rng = html_matcher.match(content, start_offset)
+		rng = html_matcher.match(content, start_offset, profile_name)
 		
 		if rng[0] is None: # nothing to wrap
 			return None
@@ -180,6 +182,9 @@ def wrap_with_abbreviation(editor, abbr, syntax=None, profile_name=None):
 	
 	if result:
 		editor.replace_content(result, start_offset, end_offset)
+		return True
+	
+	return False
 
 def unindent(editor, text):
 	"""
@@ -281,6 +286,9 @@ def prev_edit_point(editor):
 	
 	if new_point != -1:
 		editor.set_caret_pos(new_point)
+		return True
+	
+	return False
 
 def next_edit_point(editor):
 	"""
@@ -291,6 +299,9 @@ def next_edit_point(editor):
 	new_point = find_new_edit_point(editor, 1)
 	if new_point != -1:
 		editor.set_caret_pos(new_point)
+		return True
+	
+	return False
 
 def insert_formatted_newline(editor, mode='html'):
 	"""
@@ -306,7 +317,7 @@ def insert_formatted_newline(editor, mode='html'):
 		
 	if mode == 'html':
 		# let's see if we're breaking newly created tag
-		pair = html_matcher.get_tags(editor.get_content(), editor.get_caret_pos())
+		pair = html_matcher.get_tags(editor.get_content(), editor.get_caret_pos(), editor.get_profile_name())
 		
 		if pair[0] and pair[1] and pair[0]['type'] == 'tag' and pair[0]['end'] == caret_pos and pair[1]['start'] == caret_pos:
 			editor.replace_content(nl + pad + zen_coding.get_caret_placeholder() + nl, caret_pos)
@@ -314,6 +325,8 @@ def insert_formatted_newline(editor, mode='html'):
 			editor.replace_content(nl, caret_pos)
 	else:
 		editor.replace_content(nl, caret_pos)
+		
+	return True
 
 def select_line(editor):
 	"""
@@ -323,6 +336,7 @@ def select_line(editor):
 	"""
 	start, end = editor.get_current_line_range();
 	editor.create_selection(start, end)
+	return True
 
 def go_to_matching_pair(editor):
 	"""
@@ -337,7 +351,7 @@ def go_to_matching_pair(editor):
 		# looks like caret is outside of tag pair  
 		caret_pos += 1
 		
-	tags = html_matcher.get_tags(content, caret_pos)
+	tags = html_matcher.get_tags(content, caret_pos, editor.get_profile_name())
 		
 	if tags and tags[0]:
 		# match found
@@ -348,6 +362,10 @@ def go_to_matching_pair(editor):
 				editor.set_caret_pos(close_tag['start'])
 			elif close_tag['start'] <= caret_pos and close_tag['end'] >= caret_pos:
 				editor.set_caret_pos(open_tag['start'])
+				
+		return True
+	
+	return False
 				
 
 def merge_lines(editor):
@@ -360,7 +378,7 @@ def merge_lines(editor):
 	start, end = editor.get_selection_range()
 	if start == end:
 		# find matching tag
-		pair = html_matcher.match(editor.get_content(), editor.get_caret_pos())
+		pair = html_matcher.match(editor.get_content(), editor.get_caret_pos(), editor.get_profile_name())
 		if pair and pair[0] is not None:
 			start, end = pair
 	
@@ -371,6 +389,9 @@ def merge_lines(editor):
 		text = re.sub(r'\s{2,}', ' ', ''.join(lines))
 		editor.replace_content(text, start, end)
 		editor.create_selection(start, start + len(text))
+		return True
+	
+	return False
 
 def toggle_comment(editor):
 	"""
@@ -394,7 +415,7 @@ def toggle_html_comment(editor):
 		
 	if start == end:
 		# no selection, find matching tag
-		pair = html_matcher.get_tags(content, editor.get_caret_pos())
+		pair = html_matcher.get_tags(content, editor.get_caret_pos(), editor.get_profile_name())
 		if pair and pair[0]: # found pair
 			start = pair[0].start
 			end = pair[1] and pair[1].end or pair[0].end
@@ -535,7 +556,7 @@ def split_join_tag(editor, profile_name=None):
 	caret = zen_coding.get_caret_placeholder()
 
 	# find tag at current position
-	pair = html_matcher.get_tags(editor.get_content(), caret_pos)
+	pair = html_matcher.get_tags(editor.get_content(), caret_pos, profile_name or editor.get_profile_name())
 	if pair and pair[0]:
 		new_content = pair[0].full_tag
 		
@@ -547,7 +568,15 @@ def split_join_tag(editor, profile_name=None):
 				closing_slash = ' /'
 				
 			new_content = re.sub(r'\s*>$', closing_slash + '>', new_content)
-			editor.replace_content(new_content + caret, pair[0].start, pair[1].end)
+			
+			# add caret placeholder
+			if len(new_content) + pair[0].start < caret_pos:
+				new_content += caret
+			else:
+				d = caret_pos - pair[0].start
+				new_content = new_content[0:d] + caret + new_content[d:]
+			
+			editor.replace_content(new_content, pair[0].start, pair[1].end)
 		else: # split tag
 			nl = zen_coding.get_newline()
 			pad = zen_coding.get_variable('indentation')
@@ -597,7 +626,7 @@ def remove_tag(editor):
 	content = editor.get_content()
 		
 	# search for tag
-	pair = html_matcher.get_tags(content, caret_pos)
+	pair = html_matcher.get_tags(content, caret_pos, editor.get_profile_name())
 	if pair and pair[0]:
 		if not pair[1]:
 			# simply remove unary tag

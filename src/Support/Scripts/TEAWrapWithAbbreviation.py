@@ -11,7 +11,7 @@ import objc
 import TEASheetLoader
 
 from zencoding import zen_core as zen_coding
-from zencoding.zen_editor import ZenEditor
+from zen_editor import ZenEditor
 
 class TEAWrapWithAbbreviation(TEASheetLoader.TEASheetLoader):
     abbr = objc.IBOutlet()
