@@ -288,7 +288,7 @@
 			<key>action</key>
 			<string>TEAWrapWithAbbreviation</string>
 			<key>shortcut</key>
-			<string>~$A</string>
+			<string>^A</string>
 			<key>submenu</key>
 			<string>Zen Coding</string>
 		</dict>

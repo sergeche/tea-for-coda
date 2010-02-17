@@ -19,6 +19,7 @@ zen_editor.get_selection_range();
 import tea_actions as tea
 from zencoding import zen_core as zen_coding
 from zencoding import html_matcher
+from zencoding.zen_actions import get_line_padding
 import re
 
 class ZenEditor():
@@ -122,6 +123,8 @@ class ZenEditor():
 		rng = tea.new_range(start, end - start)
 		value = self.add_placeholders(value)
 		
+		value = zen_coding.pad_string(value, get_line_padding(self.get_current_line()))
+		
 		cursor_loc = value.find('$0')
 		if cursor_loc != -1:
 			select_range = tea.new_range(cursor_loc + rng.location, 0)
@@ -161,7 +164,6 @@ class ZenEditor():
 					doc_type = 'xml'
 		# No luck with the extension; check for inline style tags
 		if doc_type == 'html':
-			range = tea.get_range(self._context)
 			caret_pos = self.get_caret_pos()
 			
 			pair = html_matcher.get_tags(self.get_content(), caret_pos)
