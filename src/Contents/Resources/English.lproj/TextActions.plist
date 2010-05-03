@@ -306,7 +306,7 @@
 			<key>submenu</key>
 			<string>Zen Coding</string>
 		</dict>
-		<key>Previuos Edit Point</key>
+		<key>Previous Edit Point</key>
 		<dict>
 			<key>action</key>
 			<string>TEAZenActions</string>
