@@ -23,7 +23,8 @@ Building from source
 ====================
 
 If you want to try the latest development version of Coda, you can download
-and build the plugin from source like so:
+and build the plugin from source (easy_install py2app if you don't already
+have it) like so:
 
 	git clone git://github.com/onecrayon/tea-for-coda.git
 	cd tea-for-coda
